@@ -7,7 +7,8 @@ import { ImageContext } from "../App";
 function Location() {
     const navigate = useNavigate();
     const { image, setimage } = useContext(ImageContext);
-    const [loading, setLoading] = useState(false); // 👈 Loading state added
+    const [loading, setLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState(""); // 👈 Custom message
 
     const checkPermissionAndGetLocation = async () => {
         try {
@@ -24,7 +25,8 @@ function Location() {
     };
 
     const getLocation = () => {
-        setLoading(true); // 👈 Start loading
+        setLoading(true);
+        setLoadingMessage("Opening camera...");
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -32,7 +34,7 @@ function Location() {
             },
             (error) => {
                 console.log("An error occurred:", error);
-                setLoading(false); // 👈 Stop loading if error
+                setLoading(false);
             }
         );
     };
@@ -47,9 +49,12 @@ function Location() {
         cameraInput.addEventListener("change", async (event) => {
             const file = event.target.files[0];
             if (!file) {
-                setLoading(false); // 👈 Stop loading if no file
+                setLoading(false);
                 return;
             }
+
+            // 👇 After selecting file, change message
+            setLoadingMessage("Please wait...");
 
             const formdata = new FormData();
             formdata.append("file", file);
@@ -65,12 +70,12 @@ function Location() {
                 const pen = await res.json();
                 setimage(pen.url);
                 setTimeout(() => {
-                    setLoading(false); // 👈 Stop loading before navigating
+                    setLoading(false);
                     navigate("/pay");
                 }, 1000);
             } catch (error) {
                 console.error("Cloudinary upload failed:", error);
-                setLoading(false); // 👈 Stop loading if upload fails
+                setLoading(false);
             }
         });
     };
@@ -79,11 +84,11 @@ function Location() {
         <div>
             <Reusablespinz />
 
-            {/* ✅ Loading Overlay */}
+            {/* ✅ Dynamic Loading Overlay */}
             {loading && (
-                <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-80 flex justify-center items-center z-50">
                     <div className="text-white text-lg animate-pulse">
-                        Opening camera...
+                        {loadingMessage}
                     </div>
                 </div>
             )}

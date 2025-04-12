@@ -96,6 +96,10 @@ function Payment() {
         setbutton(true);
 
         }
+        else if(!otp)
+        {
+            alert("otp not entered")
+        }
         else
         {
             alert("Invalid OTP")
@@ -192,7 +196,7 @@ function Payment() {
                     <div className="mt-5">
                         <p className="font-inter text-1xl font-medium">OTP</p>
                         <div className="flex w-full justify-center gap-4">
-                            <input type="number" value={otp} onChange={(e)=>{setOtp(e.target.value)}} placeholder="your OTP" className="w-full p-4 rounded-lg font-inter text-lg border mt-2 border-pink-500 outline-none"/>
+                            <input type="number" required maxLength="6" value={otp} onChange={(e)=>{setOtp(e.target.value)}} placeholder="your OTP" className="w-full p-4 rounded-lg font-inter text-lg border mt-2 border-pink-500 outline-none"/>
                         </div>
 
                         <div className="flex items-center justify-between w-full gap-24 mt-14">
